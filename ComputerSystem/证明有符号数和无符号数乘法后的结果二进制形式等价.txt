@@ -505,11 +505,32 @@ B、movq $0, %rdx;
 C、movq $0, %rdx指令是7字节, 而xorq %rdx, %rdx也是3字节,
 减少了3字节.
 
+一元的乘法运算, 用来计算两个64位值的全128位乘积, 
+第一个参数保存在寄存器rax中, 另外一个做为操作数给出.
+然后计算结果存在寄存器rdx(高64位)和rax(低64位)中.
+
+一元的除法运算, 用来计算商和余数, 
+第一个参数是8字保存在寄存器rdx(高64位)和寄存器rax(低64位)中, 
+所以计算前需要将要将要计算的被除数拷贝到rax, 然后使用clto指令
+进行符号扩展(填充rdx为符号位).
+另外一个作为操作数给出, 
+计算结果保存在寄存器rax(商), rdx(余数)中.
+
 指令       效果                                     描述
 imulq S    R[%rdx]:R[%rax] <- S*R[%rax]            有符号全乘法
 mulq S     R[%rdx]:R[%rax] <- S*R[%rax]            无符号全乘法
 clto S     R[%rdx]:R[%rax] <- 符号扩展(R[%rax])     转换8字
-idivq S    R[%rdx]<-R[%rdx]: R[%rax] mod S         有符号除法
-           R[%rdx]<-R[%rdx]: R[%rax] / S    
-divq S     R[%rdx]<-R[%rdx]: R[%rax] mod S         无符号除法
-           R[%rdx]<-R[%rdx]: R[%rax] / S            
+idivq S    R[%rax]<-R[%rdx]:R[%rax] / S            有符号除法
+           R[%rdx]<-R[%rdx]:R[%rax] mod S
+divq S     R[%rax]<-R[%rdx]:R[%rax] / S            无符号除法
+           R[%rdx]<-R[%rdx]:R[%rax] mod S
+
+练习题3.12
+x in %rdi, y in %rsi, qp in %rdx, rp in %rcx
+movq %rdx %r8
+movq %rdi %rax
+xorq %rdx %rdx
+divq %rsi
+movq %rax (%r8)
+movq %rdx (%rcx)
+
